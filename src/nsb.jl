@@ -214,7 +214,7 @@ function find_nsb_entropy(S_nsb::NSBEntropy, precision::Real;verbose::Int64=0)
 	S_nb  = nsb_val_quad[2]/nsb_val_quad[1]
 	#println("S_nb = $S_nb")
 	S_nsb.S_nsb = S_nb
-	S_nsb.dS_nsb = sqrt(abs(nsb_val_quad[3]/nsb_val_quad[1] - S_nb^2))
+	S_nsb.dS_nsb = abs(nsb_val_quad[3]/nsb_val_quad[1] - S_nb^2)
 	verbose > 1 && println(nsb_val_quad[3])
 	return S_nsb,err
 end
