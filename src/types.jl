@@ -45,7 +45,34 @@ end
 
 type RenyiEntropy <: Entropy
 	H::Float64
+	σ²::Float64
 	α::Real
 	ntrials::Integer
 	bias::Float64
 end
+
+RenyiEntropy(H, α, ntrials, bias) = RenyiEntropy(H, 0.0, α, ntrials, bias)
+
+type ConditionalProbability
+	pxy::Array{Float64,2}
+	py::Array{Float64,1}
+	nxy::Array{Int64,1}
+	ny::Integer
+	xybins::Array{Array{Int64,1},1}
+	ybins::Array{Int64,1}
+end
+
+type ConditionalCounts
+	nxy::Array{Int64,2}
+	ny::Array{Int64,1}
+	xybins::Array{Array{Int64,1},1}
+	ybins::Array{Int64,1}
+end
+
+function zeros!(PP::ConditionalCounts)
+	fill!(PP.nxy, 0)
+	fill!(PP.ny,0)
+	nothing
+end
+
+
