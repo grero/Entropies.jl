@@ -22,7 +22,7 @@ function ShannonEntropy(p::Array{Float64,1}, ntrials::Integer)
 	for i in 1:np
 		@inbounds _pi = p[i]
 		if _pi > 0.0
-			_e -= _pi*log(_pi)
+			_e -= _pi*log2(_pi)
 			nnz +=1
 		end
 	end
@@ -31,7 +31,7 @@ function ShannonEntropy(p::Array{Float64,1}, ntrials::Integer)
 	for i in 1:np
 		@inbounds _pi = p[i]
 		if _pi > 0.0
-			q = log(_pi) + _e
+			q = log2(_pi) + _e
 			_vv += q*q*_pi*(1.0 - _pi)
 		end
 	end
