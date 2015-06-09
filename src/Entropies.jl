@@ -61,12 +61,64 @@ function entropy(p::Array{Float64,1})
 	nnz = 0
 	for _p in p
 		if _p > 0
-			ee += _p*log(_p)
+			ee += _p*log2(_p)
 			nnz += 1
 		end
 	end
 	-ee
 end
 
+Docile.@doc meta("Compute the conditional entropy of x, conditioning on each row in Y")->
+function conditional_entropy{T<:EntropyEstimator}(Q::Type{T}, x::Array{Int64,1}, Y::Array{Int64,2};α::Float64=1.0)
+	groups,_ = size(Y)
+	CC = Entropies.get_conditional_counts(x,Y)
+	conditional_entropy(Q, CC;α=α)
+end
+
+function conditional_entropy{T<:EntropyEstimator}(::Type{T}, CC::ConditionalCounts;α::Float64=1.0)
+	q = 0.0
+	σ² = 0.0
+	ntrials = 0
+	if α == 1
+		for i in 1:length(CC.ny)
+			if CC.ny[i] > 0
+				#_e = entropy(P.pxy[:,i],α)
+				_e = estimate(T,CC.nxy[:,i])
+				q += _e.ntrials*_e.H
+				σ² += _e.ntrials*_e.σ²
+				ntrials += _e.ntrials
+			end
+		end
+		return q/ntrials,σ²/ntrials
+	end
+	ρ = zeros(CC.ny)
+	n = sum(CC.ny)
+	for i in 1:length(ρ)
+		_pi =(CC.ny[i]/n)^α
+		q += _pi
+		ρ[i] = _pi
+	end
+	ρ = ρ./q
+	q = 0.0
+	for i in 1:length(ρ)
+		_e = estimate(T,CC.nxy[:,i],α)
+		if ρ[i] > 0
+			q += ρ[i]*g(_e.H,α)
+		end
+	end
+	hh = h(q,α), 0.0
+end
+
+function conditional_entropy{T<:EntropyEstimator}(::Type{T}, x::Array{Int64,2}, Y::Array{Int64,3};α::Float64=1.0)
+	nbins = size(x,2)
+	H = zeros(nbins)
+	σ² = zeros(nbins)
+	for i in 1:nbins
+		H[i], σ²[i] = conditional_entropy(T, x[:,i], Y[:,:,i];α=α)
+	end
+	H, σ²
+end
 
 end
+
+
