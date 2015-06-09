@@ -18,6 +18,9 @@ function ShannonEntropy(p::Array{Float64,1}, ntrials::Integer)
 	np = length(p)
 	_e = 0.0
 	nnz = 0
+	if ntrials == 0
+		return ShannonEntropy(0.0, 0.0, ntrials, 0.0)
+	end
 	#compute entropy
 	for i in 1:np
 		@inbounds _pi = p[i]
