@@ -4,6 +4,7 @@ using Docile
 @docstrings
 
 include("types.jl")
+include("counting.jl")
 include("nsb.jl")
 
 function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::Array{Int64,1}, α::Real;K::Integer=1000)
