@@ -17,8 +17,14 @@ function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::Array{Int64,1}, α::R
 end
 
 function estimate(::Type{NSBEstimator}, counts::Array{Int64,1};K::Integer=1000)
-	μ, σ² = nsb_entropy(counts,K)
-	ShannonEntropy(μ, σ², sum(counts), 0.0)
+	μ, σ²,ntrials = 0,0,0
+	try
+		μ, σ² = nsb_entropy(counts,K)
+		ntrials = sum(counts)
+	catch DomainError
+
+	end
+	ShannonEntropy(μ/log(2), σ²/(log(2)*log(2)), ntrials, 0.0)
 end
 
 function estimate(::Type{MaEstimator}, counts::Array{Int64,1})
