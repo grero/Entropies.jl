@@ -1,4 +1,3 @@
-
 abstract Entropy
 abstract EntropyEstimator
 abstract ShannonEntropyEstimator <: EntropyEstimator
