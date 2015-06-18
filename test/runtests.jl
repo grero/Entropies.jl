@@ -3,6 +3,16 @@ import StatsBase
 using Base.Test
 
 #Testing nsb_entropy
+function test_ma_estimator()
+	srand(1234)
+	X = rand(0:5, 1000)
+	n = StatsBase.countmap(X)
+	SH = Entropies.estimate(Entropies.MaEstimator, collect(values(n)))
+	@test_approx_eq SH.H 2.5850538223964947
+	@test_approx_eq SH.bias 0.0036067376022224087
+	@test_approx_eq SH.σ² 8.414455994916174e-6
+	println("MA estimator test passed")
+end
 
 function init()
 	srand(1234)
@@ -29,6 +39,8 @@ function test_mlog_evidence()
 	nsb_mlog = Entropies.mlog_evidence(200*S_nsb.K,S_nsb)
 	return @test_approx_eq nsb_mlog 46.05806318661056
 end
+
+test_ma_estimator()
 
 S_nsb = init()
 ms2 = Entropies.meanS2(370.0850,S_nsb)
