@@ -1,6 +1,7 @@
 import Entropies
 import StatsBase
 using Base.Test
+include("../src/examples.jl")
 
 #Testing nsb_entropy
 function test_ma_estimator()
@@ -12,6 +13,48 @@ function test_ma_estimator()
 	@test_approx_eq SH.bias 0.0036067376022224087
 	@test_approx_eq SH.σ² 8.414455994916174e-6
 	println("MA estimator test passed")
+end
+
+function test_renyi_estimator()
+	srand(1234)
+	X = rand(0:5, 1000)
+	n = StatsBase.countmap(X)
+	SH = Entropies.estimate(Entropies.MaEstimator, collect(values(n)), 0.5)
+	@test_approx_eq SH.H 2.583197825555981
+	println("Renyi estimator for α = 0.5 passed")
+	SH = Entropies.estimate(Entropies.MaEstimator, collect(values(n)), 2.0)
+	@test_approx_eq SH.H 2.57799095742199
+	println("Renyi estimator for α = 2.0 passed")
+end
+
+function test_nsb_estimator()
+	srand(1234)
+	X = rand(0:5, 1000)
+	n = StatsBase.countmap(X)
+	SH = Entropies.estimate(Entropies.NSBEstimator, collect(values(n)))
+	@test_approx_eq SH.H 2.585903905550866
+	@test_approx_eq SH.σ² 8.76643342970036e-5
+	println("NSB estimator test passed")
+end
+
+function test_nsb_conditional_entropy()
+	srand(1234)
+	X1, X2 = generate_data()
+	H, σ² = Entropies.conditional_entropy(Entropies.NSBEstimator,X2, X1')
+	@test_approx_eq H 2.577725611116552
+	@test_approx_eq σ² 0.0240008162325275
+	println("NSB conditional entropy estimator passed")
+end
+
+function test_renyi_conditional_entropy()
+	srand(1234)
+	X1, X2 = generate_data()
+	H, σ² = Entropies.conditional_entropy(Entropies.MaEstimator,X2, X1';α=0.5)
+	@test_approx_eq H 2.420726933070489
+	println("Renyi conditional entropy estimator with α = 0.5 passed")
+	H, σ² = Entropies.conditional_entropy(Entropies.MaEstimator,X2, X1';α=2.0)
+	@test_approx_eq H 2.343293737759252
+	println("Renyi conditional entropy estimator with α = 2.0 passed")
 end
 
 function init()
@@ -41,6 +84,10 @@ function test_mlog_evidence()
 end
 
 test_ma_estimator()
+test_renyi_estimator()
+test_nsb_estimator()
+test_nsb_conditional_entropy()
+test_renyi_conditional_entropy()
 
 S_nsb = init()
 ms2 = Entropies.meanS2(370.0850,S_nsb)
