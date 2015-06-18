@@ -98,8 +98,11 @@ function conditional_entropy{T<:EntropyEstimator}(::Type{T}, CC::ConditionalCoun
 		end
 		return q/ntrials,σ²/ntrials
 	end
-	ρ = zeros(CC.ny)
+	ρ = zeros(Float64,size(CC.ny)...)
 	n = sum(CC.ny)
+	if n == 0
+		return 0.0, 0.0
+	end
 	for i in 1:length(ρ)
 		_pi =(CC.ny[i]/n)^α
 		q += _pi
