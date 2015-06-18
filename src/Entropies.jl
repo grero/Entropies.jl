@@ -7,6 +7,12 @@ include("types.jl")
 include("counting.jl")
 include("nsb.jl")
 
+g(x,α) = 2.^((α - 1)*x) - 1.0
+g(x) = g(x,2.0)
+
+h(x,α) = log2((x+1))/(α-1) #g-inverse
+h(x) = h(x,2.0)
+
 function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::Array{Int64,1}, α::Real;K::Integer=1000)
 	if α == 1
 		return estimate(Q, counts;K=K)
