@@ -3,6 +3,7 @@ import StatsBase
 using Docile
 @docstrings
 
+include("utils.jl")
 include("types.jl")
 include("counting.jl")
 include("nsb.jl")
@@ -14,13 +15,17 @@ h(x,α) = log2((x+1))/(α-1) #g-inverse
 h(x) = h(x,2.0)
 
 function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::Array{Int64,1}, α::Real;K::Integer=1000)
+	ntrials = sum(counts)
 	if α == 1
 		return estimate(Q, counts;K=K)
 	end
-	ntrials = sum(counts)
 	p = counts/ntrials
 	ee = entropy(p, α)
 	return RenyiEntropy(ee, α, ntrials, 0.0)
+end
+function estimate{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, α::Real=1.0;K::Integer=1000)
+    counts = StatsBase.countmap(hash(X))
+    estimate(Q, collect(values(counts)), α;K=K)
 end
 
 function estimate(::Type{NSBEstimator}, counts::Array{Int64,1};K::Integer=1000)
@@ -34,7 +39,7 @@ function estimate(::Type{NSBEstimator}, counts::Array{Int64,1};K::Integer=1000)
 	ShannonEntropy(μ/log(2), σ²/(log(2)*log(2)), ntrials, 0.0)
 end
 
-function estimate(::Type{MaEstimator}, counts::Array{Int64,1})
+function estimate(::Type{MaEstimator}, counts::Array{Int64,1};K::Integer=1000)
 	ntrials = sum(counts)
 	pp = counts./ntrials
 	SE  = ShannonEntropy(pp, ntrials)
@@ -119,14 +124,26 @@ function conditional_entropy{T<:EntropyEstimator}(::Type{T}, CC::ConditionalCoun
 	hh = h(q,α), 0.0
 end
 
-function conditional_entropy{T<:EntropyEstimator}(::Type{T}, x::Array{Int64,2}, Y::Array{Int64,3};α::Float64=1.0)
+function conditional_entropy{T<:EntropyEstimator}(Q::Type{T}, x::Array{Int64,2}, Y::Array{Int64,3};α::Float64=1.0,nruns::Int64=100)
 	nbins = size(x,2)
+        SE = Array(ShannonEntropy,nbins)
+        conditional_entropy!(SE,Q, x, Y;α=α, nruns=nruns)
 	H = zeros(nbins)
 	σ² = zeros(nbins)
+        for i in 1:nbins
+            H[i] = SE[i].H
+            σ²[i] = SE[i].σ²
+        end
+        H, σ²
+end
+
+function conditional_entropy!{T<:EntropyEstimator, TE<:Entropy}(SE::Array{TE,1}, ::Type{T}, x::Array{Int64,2}, Y::Array{Int64,3};α::Float64=1.0,nruns::Int64=100)
+	nbins = size(x,2)
+        ntrials = size(x,1)
 	for i in 1:nbins
-		H[i], σ²[i] = conditional_entropy(T, x[:,i], Y[:,:,i];α=α)
+		h,σ² = conditional_entropy(T, x[:,i], Y[:,:,i];α=α)
+                SE[i] = ShannonEntropy(h, σ², ntrials, 0.0)
 	end
-	H, σ²
 end
 
 end

@@ -3,7 +3,20 @@ import StatsBase
 using Base.Test
 include("../src/examples.jl")
 
-#Testing nsb_entropy
+function test_hash()
+    srand(1234)
+    Y = rand(0:1,(5,100))
+    E_nsb = Entropies.estimate(Entropies.NSBEstimator, Y, 1.0)
+    @test_approx_eq E_nsb.H 5.121949001404041
+    @test_approx_eq E_nsb.σ² 0.030257361952703593
+    println("Test 2D entropy with NSB-estimator passed")
+
+    E_ma = Entropies.estimate(Entropies.MaEstimator, Y, 1.0)
+    @test_approx_eq E_ma.H 4.946936297034786
+    @test_approx_eq E_ma.σ² 0.005368400644084358
+    println("Test 2D entropy with MA-estimator passed")
+end
+
 function test_ma_estimator()
 	srand(1234)
 	X = rand(0:5, 1000)
@@ -88,6 +101,7 @@ test_renyi_estimator()
 test_nsb_estimator()
 test_nsb_conditional_entropy()
 test_renyi_conditional_entropy()
+test_hash()
 
 S_nsb = init()
 ms2 = Entropies.meanS2(370.0850,S_nsb)
