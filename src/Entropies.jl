@@ -8,6 +8,7 @@ include("utils.jl")
 include("types.jl")
 include("counting.jl")
 include("nsb.jl")
+include("information.jl")
 
 g(x,α) = 2.^((α - 1)*x) - 1.0
 g(x) = g(x,2.0)
