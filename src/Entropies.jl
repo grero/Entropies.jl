@@ -1,5 +1,6 @@
 module Entropies
 import StatsBase
+import ArrayViews
 using Docile
 @docstrings
 
@@ -14,7 +15,7 @@ g(x) = g(x,2.0)
 h(x,α) = log2((x+1))/(α-1) #g-inverse
 h(x) = h(x,2.0)
 
-function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::Array{Int64,1}, α::Real;K::Integer=1000)
+function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::AbstractArray{Int64,1}, α::Real;K::Integer=1000)
 	ntrials = sum(counts)
 	if α == 1
 		return estimate(Q, counts;K=K)
@@ -23,9 +24,9 @@ function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::Array{Int64,1}, α::R
 	ee = entropy(p, α)
 	return RenyiEntropy(ee, α, ntrials, 0.0)
 end
-function estimate{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, α::Real=1.0;K::Integer=1000)
-    counts = StatsBase.countmap(hash(X))
-    estimate(Q, collect(values(counts)), α;K=K)
+function estimate{T<:EntropyEstimator}(Q::Type{T}, X::AbstractArray{Int64,2}, α::Real=1.0;K::Integer=1000)
+    counts = collect(values(StatsBase.countmap(vhash(X))))
+    estimate(Q, counts, α;K=max(maximum(counts), K))
 end
 
 function estimate(::Type{NSBEstimator}, counts::Array{Int64,1};K::Integer=1000)
