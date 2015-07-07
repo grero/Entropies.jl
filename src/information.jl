@@ -24,3 +24,16 @@ function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Arra
         Hs .- H[:,1], σ²[:,1].+σ²s
     end
 end
+
+function information{T<:EntropyEstimator}(Q::Type{T}, s::Array{Int64,1}, N::Array{Int64,3},nruns::Int64=1)
+    ntrials,nbins.ncells = size(N)
+    x = repmat(s, 1, nbins)
+    I = zeros(nbins1, ncells)
+    M = zeros(nbins, ncells)
+    S = zeros(nbins, ncells)
+    for i in 1:ncells
+        Y = permutedims(cat(3, N[:, :, i]), (3,1,2))
+        I[:,i], M[:,i], S[:,i] = Entropies.information(Entropies.MaEstimator, x, Y, nruns)
+    end
+    I,M,S
+end
