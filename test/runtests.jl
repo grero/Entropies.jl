@@ -1,7 +1,26 @@
 import Entropies
 import StatsBase
+import Distributions
 using Base.Test
-include("../src/examples.jl")
+
+function generate_data(;ntrials::Int64=1000,β₀::Real=0.19,β₁::Real=0.43, λ₁::Real=5.0)
+	#log(λ₁) = log(r) + (β₀ + β₁*λ₁)
+	#Q = β₀/(β₁λ₁) ; ratio between background firing and influence from cell 1
+	#β₁ = log(λ₁/r)/(λ₁(Q+1));
+
+	X1 = zeros(Int64,ntrials)
+	X2 = zeros(Int64,ntrials)
+	#X3 = zeros(Int64,ntrials)
+	P1 = Distributions.Poisson(λ₁)
+	for i in 1:ntrials
+		X1[i] = rand(P1)
+		#λ₂ = exp(β₀ + β₁*X1[i])
+		λ₂ = log(1 + exp(β₀ + β₁*X1[i]))
+		#λ₃ = log(1 + exp(β₀ + β₁*X1[i]))
+		X2[i] = rand(Distributions.Poisson(λ₂))
+	end
+	return X1, X2
+end
 
 function test_hash()
     srand(1234)
