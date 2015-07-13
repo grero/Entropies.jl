@@ -49,7 +49,7 @@ function NSBEntropy(nx::Array{Int64,1},kx::Array{Int64,1}, K::Int64)
 end
 
 
-@doc meta("""
+Docile.@doc meta("""
 	Estimate the entropy of the count distribution ``n`` using the NSB algorithm. The parameter K specifies the size of the alphabet, i.e. the maximum number of bins. Returns the estimated entropy and the standard deviation of the esimate, both in units of nats
 """ ,return_type = (Float64, Float64) ) -> 
 function nsb_entropy(n::Array{Int64,1},K::Int64;precision::Real=1e-5)

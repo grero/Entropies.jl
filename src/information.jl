@@ -26,9 +26,9 @@ function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Arra
 end
 
 function information{T<:EntropyEstimator}(Q::Type{T}, s::Array{Int64,1}, N::Array{Int64,3},nruns::Int64=1)
-    ntrials,nbins.ncells = size(N)
+    ntrials,nbins,ncells = size(N)
     x = repmat(s, 1, nbins)
-    I = zeros(nbins1, ncells)
+    I = zeros(nbins, ncells)
     M = zeros(nbins, ncells)
     S = zeros(nbins, ncells)
     for i in 1:ncells

@@ -47,7 +47,7 @@ function estimate(::Type{MaEstimator}, counts::Array{Int64,1};K::Integer=1000)
 	SE  = ShannonEntropy(pp, ntrials)
 end
 
-@doc meta("Compute tne Renyi entropy of order `α` of the discrete variable `x`. `α` = 1 corresponds to Shannon entropy")->
+Docile.@doc meta("Compute tne Renyi entropy of order `α` of the discrete variable `x`. `α` = 1 corresponds to Shannon entropy")->
 function entropy(x::Array{Int64,1},α::Real)
   n = StatsBase.counts(x,minimum(x):maximum(x))
   p = n./sum(n)
