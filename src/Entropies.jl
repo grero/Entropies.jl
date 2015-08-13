@@ -16,21 +16,25 @@ g(x) = g(x,2.0)
 h(x,α) = log2((x+1))/(α-1) #g-inverse
 h(x) = h(x,2.0)
 
-function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::AbstractArray{Int64,1}, α::Real;K::Integer=1000)
+function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::AbstractArray{Int64,1}, α::Real,K::Integer=1000)
 	ntrials = sum(counts)
 	if α == 1
-		return estimate(Q, counts;K=K)
+		return estimate(Q, counts,K)
 	end
-	p = counts/ntrials
+        n = length(counts)
+        p = zeros(Float64,n)
+        for i in 1:n
+            @inbounds p[i] = counts[i]/ntrials
+        end
 	ee = entropy(p, α)
 	return RenyiEntropy(ee, α, ntrials, 0.0)
 end
-function estimate{T<:EntropyEstimator}(Q::Type{T}, X::AbstractArray{Int64,2}, α::Real=1.0;K::Integer=1000)
+function estimate{T<:EntropyEstimator}(Q::Type{T}, X::AbstractArray{Int64,2}, α::Real=1.0,K::Integer=1000)
     counts = collect(values(StatsBase.countmap(vhash(X))))
-    estimate(Q, counts, α;K=max(maximum(counts), K))
+    estimate(Q, counts, α,max(maximum(counts), K))
 end
 
-function estimate(::Type{NSBEstimator}, counts::Array{Int64,1};K::Integer=1000)
+function estimate(::Type{NSBEstimator}, counts::Array{Int64,1},K::Integer=1000)
 	μ, σ²,ntrials = 0,0,0
 	try
 		μ, σ² = nsb_entropy(counts,K)
@@ -41,7 +45,7 @@ function estimate(::Type{NSBEstimator}, counts::Array{Int64,1};K::Integer=1000)
 	ShannonEntropy(μ/log(2), σ²/(log(2)*log(2)), ntrials, 0.0)
 end
 
-function estimate(::Type{MaEstimator}, counts::Array{Int64,1};K::Integer=1000)
+function estimate(::Type{MaEstimator}, counts::Array{Int64,1},K::Integer=1000)
 	ntrials = sum(counts)
 	pp = counts./ntrials
 	SE  = ShannonEntropy(pp, ntrials)
@@ -86,16 +90,16 @@ Docile.@doc meta("Compute the conditional entropy of x, conditioning on each row
 function conditional_entropy{T<:EntropyEstimator}(Q::Type{T}, x::Array{Int64,1}, Y::AbstractArray{Int64,2};α::Float64=1.0)
 	groups,_ = size(Y)
 	CC = Entropies.get_conditional_counts(x,Y)
-	conditional_entropy(Q, CC;α=α)
+	conditional_entropy(Q, CC,α)
 end
 
 function conditional_entropy{T<:EntropyEstimator}(Q::Type{T}, x::Array{Int64,1}, Y::Array{Int64,1}...;α::Float64=1.0)
 	groups,_ = size(Y)
 	CC = Entropies.get_conditional_counts(x,Y...)
-	conditional_entropy(Q, CC;α=α)
+	conditional_entropy(Q, CC,α)
 end
 
-function conditional_entropy{T<:EntropyEstimator}(::Type{T}, CC::ConditionalCounts;α::Float64=1.0)
+function conditional_entropy{T<:EntropyEstimator}(::Type{T}, CC::ConditionalCounts,α::Float64=1.0)
 	q = 0.0
 	σ² = 0.0
 	ntrials = 0
@@ -130,6 +134,10 @@ function conditional_entropy{T<:EntropyEstimator}(::Type{T}, CC::ConditionalCoun
 		end
 	end
 	hh = h(q,α), 0.0
+end
+
+function conditional_entropy(CC::ConditionalCounts,α::Float64=1.0)
+    conditional_entropy(MaEstimator, CC,α)
 end
 
 function conditional_entropy{T<:EntropyEstimator}(Q::Type{T}, x::Array{Int64,2}, Y::Array{Int64,3};α::Float64=1.0,nruns::Int64=100)
