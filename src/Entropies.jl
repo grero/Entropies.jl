@@ -2,6 +2,7 @@ module Entropies
 import StatsBase
 import ArrayViews
 using Docile
+import StatsBase.entropy
 @docstrings
 
 include("utils.jl")
@@ -65,25 +66,13 @@ end
 
 function entropy(p::Array{Float64,1},α::Real)
   if α == 1
-	  return entropy(p)
+	  return entropy(p)/log(2)
   end
   E = 0.0
   for i in 1:length(p)
     @inbounds E += p[i]^α
   end
   E = (1/(1-α))*log2(E)
-end
-
-function entropy(p::Array{Float64,1})
-	ee = 0.0
-	nnz = 0
-	for _p in p
-		if _p > 0
-			ee += _p*log2(_p)
-			nnz += 1
-		end
-	end
-	-ee
 end
 
 Docile.@doc meta("Compute the conditional entropy of x, conditioning on each row in Y")->
