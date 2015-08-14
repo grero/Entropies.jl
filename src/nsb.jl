@@ -27,7 +27,7 @@ end
 
 function NSBEntropy(n::Array{Int64,1},K::Int64)
 	k = StatsBase.counts(n, 1:maximum(n))
-	nx = [1:maximum(n)][k.!=0]
+	nx = collect(1:maximum(n))[k.!=0]
 	kx = k[k.>0]
 	idx = nx .> 1
 	nc = nx[idx]
@@ -546,7 +546,7 @@ function max_evidence(S_est::NSBEntropy, precision::Real;verbose::Int64=0)
 		order = 10
 		b = get_coefficients(N)
 
-		B0ep = N*sum(ep.^[-1:order].*b)
+		B0ep = N*sum(ep.^collect(-1:order).*b)
 		if B0ep < 0
 			B0ep = precision
 			verbose > 0 && warn("MAX_EVIDENCE: Series expansion for B_0 did not converge")
@@ -609,7 +609,7 @@ function max_evidence(S_est::NSBEntropy, precision::Real;verbose::Int64=0)
 				(B[1]^4*pg4B0)/ 24 - (B[1]^4*pg4NB0)/24 +  B[2]*d1f0 +
 				B0*B[1]*d2f0 + (B0^3*d3f0)/6)/(-denum)
 
-		Φ = sum(B'.*((K+0.0).^(-[1:order_K])))
+		Φ = sum(B'.*((K+0.0).^(-collect(1:order_K))))
 		Bcl += Φ
 		#println("B = $B")
 		#println("B0 = $B0") #correct
@@ -881,14 +881,14 @@ function B_xiK(K::Int64)
 	step = 1.0e-2
 	b1 = 10.0
 	b2 = 100.0*K
-	b = zeros(int(b1/step+1 + ceil(log(b2)/step)))
-	b[1:b1/step+1] = 0:step:b1
-	b[b1/step+3:end] = b1*exp([step:step:log(b2)])
+	b = zeros(round(Int,b1/step+1 + ceil(log(b2)/step)))
+	b[1:round(Int,b1/step+1)] = 0:step:b1
+	b[round(Int,b1/step+3):end] = b1*exp([step:step:log(b2)])
 	#b = [0:step:b1,b1*exp([step:step:log(b2)])]
 	Bxi_interp_in = zeros(2,length(b))
 	Bxi_interp_in[1,:] = xi_KB(K,b)
 	Bxi_interp_in[2,:] = b
-	dxi = float([1.0e-3:log(K)*1.0e-3:log(K)-1.0e-3])
+	dxi = collect(1.0e-3:log(K)*1.0e-3:log(K)-1.0e-3)
 	Bxi_interp_in_new = zeros(2,length(dxi))
 	Bxi_interp_in_new[1,:] = dxi
 	Bxi_interp_in_new[2,:]  = B_xiK(Bxi_interp_in, dxi,K)
