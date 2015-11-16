@@ -101,7 +101,7 @@ psi_asymp(x) = psi(x) - log(x) #FIXME is perhaps not as accurate as we want
 function find_nsb_entropy(n::Array{Int64,1}, K::Integer, precision::Real;verbose::Int64=0)
 	S_nsb = NSBEntropy(n,K)
 	k = StatsBase.counts(n, 1:maximum(n))
-	nx = [1:maximum(n)][k.!=0]
+	nx = collect(1:maximum(n))[k.!=0]
 	kx = k[k.>0]
 	return find_nsb_entropy(S_nsb,precision;verbose=verbose)
 end
@@ -177,10 +177,12 @@ function find_nsb_entropy(S_nsb::NSBEntropy, precision::Real;verbose::Int64=0)
 				#println("nsb_mlog_quad = $nsb_mlog_quad")
 
 				for j in 1:length(worst)
-					limval[worst[j]] = integs[i](xi_lim[worst[j]],S_nsb, nsb_mlog_quad[1])[1]
+                    wj = round(Int64,worst[j])
+					limval[wj] = integs[i](xi_lim[wj],S_nsb, nsb_mlog_quad[1])[1]
 				end
 				for j in 1:length(best)
-					limval[best[j]] = integs[i](xi_lim[best[j]],S_nsb,nsb_mlog_quad[1])[1]
+                    bj = round(Int64,best[j])
+					limval[bj] = integs[i](xi_lim[bj],S_nsb,nsb_mlog_quad[1])[1]
 				end
 				tmp,worst = findmax(limval)
 				tmp,best = findmin(limval)
@@ -766,9 +768,9 @@ function mlog_evidence(B::Real, S_nsb::NSBEntropy)
 	#println("f = $f")
 	#println("MLOG_EVIDENCE: f = $f")
 	if B > max(100,100*N)
-		nterms = int(ceil(abs((-15.0 - log10(N))./log10(N./B))))
+		nterms = round(Int64,ceil(abs((-15.0 - log10(N))./log10(N./B))))
 		#println("nterms = $nterms")
-		ifac = 1./cumprod([2:(nterms+1)])
+		ifac = 1./cumprod(collect(2:(nterms+1)))
 		#println("ifac = $ifac")
 		for i in nterms:-1:1
 			f += polygamma(i,B).*ifac[i].*Nf^(i+1)
@@ -883,7 +885,7 @@ function B_xiK(K::Int64)
 	b2 = 100.0*K
 	b = zeros(round(Int,b1/step+1 + ceil(log(b2)/step)))
 	b[1:round(Int,b1/step+1)] = 0:step:b1
-	b[round(Int,b1/step+3):end] = b1*exp([step:step:log(b2)])
+	b[round(Int,b1/step+3):end] = b1*exp(collect(step:step:log(b2)))
 	#b = [0:step:b1,b1*exp([step:step:log(b2)])]
 	Bxi_interp_in = zeros(2,length(b))
 	Bxi_interp_in[1,:] = xi_KB(K,b)

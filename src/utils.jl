@@ -3,7 +3,7 @@ using Distributions
 function vhash{T<:Integer}(X::AbstractArray{T,2})
 	ndims = size(X,1)
 	base = maximum(X)+1
-	x = base.^[0:ndims-1]
+	x = base.^(0:ndims-1)
 	return X'*x
 end
 
@@ -24,7 +24,7 @@ end
 
 JointPoisson(λ::Array{Float64,1}) = JointPoisson(λ,length(λ))
 
-Base.length(s::Union(SimpleConditional,JointPoisson)) = s.n
+Base.length(s::Union{SimpleConditional,JointPoisson}) = s.n
 
 function Distributions._rand!{T<:Real}(s::SimpleConditional, x::AbstractVector{T})
     m = size(s.P,1)
