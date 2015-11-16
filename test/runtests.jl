@@ -27,7 +27,7 @@ function test_hash()
     Y = rand(0:1,(5,100))
     E_nsb = Entropies.estimate(Entropies.NSBEstimator, Y, 1.0)
     @test_approx_eq E_nsb.H 5.121949001404041
-    @test_approx_eq E_nsb.σ² 0.030257361952703593
+    @test_approx_eq E_nsb.σ² 0.030257361952552006
     println("Test 2D entropy with NSB-estimator passed")
 
     E_ma = Entropies.estimate(Entropies.MaEstimator, Y, 1.0)
@@ -65,7 +65,7 @@ function test_nsb_estimator()
 	n = StatsBase.countmap(X)
 	SH = Entropies.estimate(Entropies.NSBEstimator, collect(values(n)))
 	@test_approx_eq SH.H 2.585903905550866
-	@test_approx_eq SH.σ² 8.76643342970036e-5
+	@test_approx_eq SH.σ² 8.76643342960793e-5
 	println("NSB estimator test passed")
 end
 
@@ -73,19 +73,19 @@ function test_nsb_conditional_entropy()
 	srand(1234)
 	X1, X2 = generate_data()
 	H, σ² = Entropies.conditional_entropy(Entropies.NSBEstimator,X2, X1')
-	@test_approx_eq H 2.577725611116552
-	@test_approx_eq σ² 0.0240008162325275
-	println("NSB conditional entropy estimator passed")
+	@test_approx_eq H 2.6303445189858787
+	@test_approx_eq σ² 0.03910289523194087
+    println("NSB conditional entropy estimator passed")
 end
 
 function test_renyi_conditional_entropy()
 	srand(1234)
 	X1, X2 = generate_data()
 	H, σ² = Entropies.conditional_entropy(Entropies.MaEstimator,X2, X1';α=0.5)
-	@test_approx_eq H 2.420726933070489
-	println("Renyi conditional entropy estimator with α = 0.5 passed")
+	@test_approx_eq H 2.55525429245648
+    println("Renyi conditional entropy estimator with α = 0.5 passed")
 	H, σ² = Entropies.conditional_entropy(Entropies.MaEstimator,X2, X1';α=2.0)
-	@test_approx_eq H 2.343293737759252
+	@test_approx_eq H 2.4195163659791508
 	println("Renyi conditional entropy estimator with α = 2.0 passed")
 end
 
