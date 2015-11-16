@@ -26,9 +26,9 @@ function ConditionalCounts(nx::Int64, ng::Int64...)
 	ny = zeros(Int64,nn)
 	xybins = Array(Array{Int64,1}, length(ng))
 	for i in 1:length(ng)
-		xybins[i] = [0:ng[i]-1]
+		xybins[i] = collect(0:ng[i]-1)
 	end
-	ybins = [0:nx-1]
+	ybins = collect(0:nx-1)
 	ConditionalCounts(nxy, ny, xybins, ybins)
 end
 
