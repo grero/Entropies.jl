@@ -39,7 +39,14 @@ function get_conditional_counts!(PP::ConditionalCounts, x::Array{Int64,1}, group
 		ng[gg] = length(PP.xybins[gg])
 	end
 	for i in 1:length(x)
-		q = sub2ind(ng,(ArrayViews.view(groups,:,i)+1))
+        #inline sub2in
+        q = groups[1,i]+1
+        s = 1
+        for j in 2:ngroups
+            s *= ng[j-1]
+            q += (groups[j,i])*s
+        end
+		#q = sub2ind(ng,ArrayViews.view(groups,:,i)+1)
 		PP.nxy[x[i]+ 1,q] += 1
 		PP.ny[q] += 1
 	end
@@ -51,14 +58,17 @@ function get_conditional_counts!(PP::ConditionalCounts, x::Array{Int64,1}, group
 	for gg in 1:ngroups
 		ng[gg] = length(PP.xybins[gg])
 	end
-        gi = zeros(Int64,ngroups)
+    gi = zeros(Int64,ngroups)
 	for i in 1:length(x)
-            for j in 1:ngroups
-                gi[j] = groups[j][i]+1
-            end
-            q = sub2ind(ng,gi)
-            PP.nxy[x[i]+ 1,q] += 1
-            PP.ny[q] += 1
+        q = groups[1][i]+1
+        s = 1
+        for j in 2:ngroups
+            s *= ng[j-1]
+            q += (groups[j][i])*s
+        end
+        #q = sub2ind(ng,gi)
+        PP.nxy[x[i]+ 1,q] += 1
+        PP.ny[q] += 1
 	end
 end
 

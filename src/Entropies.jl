@@ -83,7 +83,6 @@ function conditional_entropy{T<:EntropyEstimator}(Q::Type{T}, x::Array{Int64,1},
 end
 
 function conditional_entropy{T<:EntropyEstimator}(Q::Type{T}, x::Array{Int64,1}, Y::Array{Int64,1}...;α::Float64=1.0)
-	groups,_ = size(Y)
 	CC = Entropies.get_conditional_counts(x,Y...)
 	conditional_entropy(Q, CC,α)
 end
