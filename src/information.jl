@@ -1,5 +1,5 @@
 Docile.@doc "computes the mutual information between X and Y"->
-function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Array{Int64,3},nruns::Int64=1)
+function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Array{Int64,3},nruns::Int64=1,α::Real=1.0)
     nbins = size(X,2)
     H = zeros(nbins,nruns)
     σ² = zeros(nbins,nruns)
@@ -11,7 +11,7 @@ function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Arra
         Hs[i] = SE.H
         σ²s[i] = SE.σ²
         for r in 1:nruns
-            H[i,r],σ²[i,r] = conditional_entropy(Q,Xs[:,i], Y[:,:,i])
+            H[i,r],σ²[i,r] = conditional_entropy(Q,Xs[:,i], Y[:,:,i];α=α)
             shuffle!(ArrayViews.view(Xs, :, i))
         end
     end
@@ -25,7 +25,7 @@ function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Arra
     end
 end
 
-function information{T<:EntropyEstimator}(Q::Type{T}, s::Array{Int64,1}, N::Array{Int64,3},nruns::Int64=1)
+function information{T<:EntropyEstimator}(Q::Type{T}, s::Array{Int64,1}, N::Array{Int64,3},nruns::Int64=1,α::Real=1.0)
     ntrials,nbins,ncells = size(N)
     x = repmat(s, 1, nbins)
     I = zeros(nbins, ncells)
@@ -33,7 +33,7 @@ function information{T<:EntropyEstimator}(Q::Type{T}, s::Array{Int64,1}, N::Arra
     S = zeros(nbins, ncells)
     for i in 1:ncells
         Y = permutedims(cat(3, N[:, :, i]), (3,1,2))
-        I[:,i], M[:,i], S[:,i] = Entropies.information(Entropies.MaEstimator, x, Y, nruns)
+        I[:,i], M[:,i], S[:,i] = Entropies.information(Entropies.MaEstimator, x, Y, nruns,α)
     end
     I,M,S
 end
