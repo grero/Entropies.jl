@@ -1,18 +1,20 @@
-Docile.@doc "computes the mutual information between X and Y"->
-function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Array{Int64,3},nruns::Int64=1,α::Real=1.0)
+"""
+Computes H(X) - H(X|Y)
+"""
+function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Array{Int64,2},nruns::Int64=1,α::Real=1.0)
     nbins = size(X,2)
     H = zeros(nbins,nruns)
     σ² = zeros(nbins,nruns)
     Hs = zeros(nbins)
     σ²s = zeros(nbins)
-    Xs = copy(X)
+    Ys = copy(X)
     for i in 1:nbins
         SE = estimate(Q,X[:,i]')
         Hs[i] = SE.H
         σ²s[i] = SE.σ²
         for r in 1:nruns
-            H[i,r],σ²[i,r] = conditional_entropy(Q,Xs[:,i], Y[:,:,i];α=α)
-            shuffle!(ArrayViews.view(Xs, :, i))
+            H[i,r],σ²[i,r] = conditional_entropy(Q,X[:,i], Ys[:,i];α=α)
+            shuffle!(ArrayViews.view(Ys, :, i))
         end
     end
     if nruns > 1
@@ -26,31 +28,43 @@ function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Arra
 end
 
 """
-Computes H(X|S) - H(X|S,Y),
+Computes H(X|Y) - H(X|Y,Z)
+
+  function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Array{Int64,2},Z::Array{Int64,2}, nruns::Int64=1,α::Real=1.0)
+
 """
-function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Array{Int64,2},s::Array{Int64,1}, nruns::Int64=1,α::Real=1.0)
+function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Array{Int64,2},Z::Array{Int64,2}, nruns::Int64=1,α::Real=1.0)
   ntrials,nbins = size(X)
-  ntrials == length(s) == size(Y,1) || throw(ArgumentError("All variables must have the same number of trials"))
-  Hx_s = zeros(1,nbins) #H(X|S)
-  σx_s = zeros(Hx_s)
-  Hx_sy = zeros(nruns+1,nbins) #H(X|S,Y)
-  σx_sy = zeros(Hx_sy)
-  Ys = copy(Y)
+  ntrials == size(Y,1) == size(Z,1) || throw(ArgumentError("All variables must have the same number of trials"))
+  Hx_y = zeros(1,nbins) #H(X|S)
+  σx_s = zeros(Hx_y)
+  Hx_yz = zeros(nruns+1,nbins) #H(X|S,Y)
+  σx_sy = zeros(Hx_yz)
+  Zs = copy(Z)
   for i in 1:nbins
-    Hx_s[1,i], σx_s[1,i] = conditional_entropy(Q, X[:,i], s;α=α)
-    Hx_sy[1,i], σx_s[1,i] = conditional_entropy(Q, X[:,i], Y[:,i],s;α=α)
+    Hx_y[1,i], σx_s[1,i] = conditional_entropy(Q, X[:,i], Y[:,i];α=α)
+    Hx_yz[1,i], σx_sy[1,i] = conditional_entropy(Q, X[:,i], Y[:,i], Z[:,i];α=α)
   end
   for r in 2:nruns+1
     for i in 1:nbins
-      shuffle!(ArrayViews.view(Ys,:,i))
-      Hx_sy[r,i], σx_sy[r,i] = conditional_entropy(Q, X[:,i], Ys[:,i],s;α=α)
+      shuffle!(ArrayViews.view(Zs,:,i))
+      Hx_yz[r,i], σx_sy[r,i] = conditional_entropy(Q, X[:,i], Y[:,i], Zs[:,i];α=α)
     end
   end
-  I = Hx_s - Hx_sy[1,:]
-  Is = Hx_s .- Hx_sy
+  I = Hx_y - Hx_yz[1,:]
+  Is = Hx_y .- Hx_yz
   M = mean(Is[2:end,:],1)
   S = std(Is[2:end,:],1)
   I, M, S, Is
+end
+
+"""
+Computes H(S|Y) - H(S|Y,Z) when S is constant across bins
+"""
+function information{T<:EntropyEstimator}(Q::Type{T}, s::Array{Int64,1}, Y::Array{Int64,2},Z::Array{Int64,2}, nruns::Int64=1,α::Real=1.0)
+  ntrials,nbins = size(Y)
+  X = repmat(s,1,nbins)
+  information(Q, X, Y, Z, nruns, α)
 end
 
 function information{T<:EntropyEstimator}(Q::Type{T}, s::Array{Int64,1}, N::Array{Int64,3},nruns::Int64=1,α::Real=1.0)

@@ -117,12 +117,27 @@ function test_mlog_evidence()
 	return @test_approx_eq nsb_mlog 46.05806318661056
 end
 
+function test_information()
+	srand(1234)
+	#create two variables
+	X1 = rand(1:4, 1000);
+	X2 = rand(5:9, 1000);
+	X = cat(1, X1, X2)
+	s = cat(1, ones(Int64,1000), fill(2, 1000));
+	#the mutual information between X and s is 1 bit
+	Z = ones(Int64,2000,1) #dummy variable
+	I,M,S = Entropies.information(Entropies.MaEstimator, s'', Z, X'', 100)
+	@test_approx_eq I[1,1] 1.0003606737602229
+	println("Test information passed")
+end
+
 test_ma_estimator()
 test_renyi_estimator()
 test_nsb_estimator()
 test_nsb_conditional_entropy()
 test_renyi_conditional_entropy()
 test_hash()
+test_information()
 
 S_nsb = init()
 ms2 = Entropies.meanS2(370.0850,S_nsb)
@@ -135,5 +150,3 @@ nsb_mlog = Entropies.mlog_evidence(200*S_nsb.K,S_nsb)
 
 Entropies.find_nsb_entropy(S_nsb,1e-5)
 @test_approx_eq S_nsb.S_nsb 4.3952671710926685
-
-
