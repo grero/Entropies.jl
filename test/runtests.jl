@@ -82,12 +82,10 @@ function test_renyi_conditional_entropy()
 	srand(1234)
 	X1, X2 = generate_data()
 	H, σ² = Entropies.conditional_entropy(Entropies.MaEstimator,X2, X1';α=0.5)
-	@test_approx_eq H 2.55525429245648
-	H, σ² = Entropies.conditional_entropy(Entropies.MaEstimator,X2, X1;α=0.5)
-	@test_approx_eq H 2.55525429245648
-    println("Renyi conditional entropy estimator with α = 0.5 passed")
+	@test_approx_eq H 2.6155598394936845
+  println("Renyi conditional entropy estimator with α = 0.5 passed")
 	H, σ² = Entropies.conditional_entropy(Entropies.MaEstimator,X2, X1';α=2.0)
-	@test_approx_eq H 2.4195163659791508
+	@test_approx_eq H 2.392192940814462
 	println("Renyi conditional entropy estimator with α = 2.0 passed")
 end
 

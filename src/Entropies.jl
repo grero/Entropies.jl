@@ -11,10 +11,10 @@ include("counting.jl")
 include("nsb.jl")
 include("information.jl")
 
-g(x,α) = 2.^((α - 1)*x) - 1.0
+g(x,α) = 2.^((1-α)*x) - 1.0
 g(x) = g(x,2.0)
 
-h(x,α) = log2((x+1))/(α-1) #g-inverse
+h(x,α) = log2((x+1))/(1-α) #g-inverse
 h(x) = h(x,2.0)
 
 function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::AbstractArray{Int64,1}, α::Real,K::Integer=1000)
@@ -151,5 +151,3 @@ function conditional_entropy!{T<:EntropyEstimator, TE<:Entropy}(SE::Array{TE,1},
 end
 
 end
-
-
