@@ -55,7 +55,7 @@ function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Arra
   Is = Hx_y .- Hx_yz
   M = mean(Is[2:end,:],1)
   S = std(Is[2:end,:],1)
-  I, M, S, Is
+  I, M, S
 end
 
 """
