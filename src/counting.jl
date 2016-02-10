@@ -32,7 +32,7 @@ function ConditionalCounts(nx::Int64, ng::Int64...)
 	ConditionalCounts(nxy, ny, xybins, ybins)
 end
 
-function get_conditional_counts!(PP::ConditionalCounts, x::Array{Int64,1}, groups::AbstractArray{Int64,2})
+function get_conditional_counts!(PP::ConditionalCounts, x::AbstractArray{Int64,1}, groups::AbstractArray{Int64,2})
 	ngroups = size(groups,1)
 	ng = zeros(Int64,ngroups)
 	for gg in 1:ngroups
@@ -60,19 +60,19 @@ function get_conditional_counts!(PP::ConditionalCounts, x::Array{Int64,1}, group
 	end
     gi = zeros(Int64,ngroups)
 	for i in 1:length(x)
-        q = groups[1][i]+1
-        s = 1
-        for j in 2:ngroups
-            s *= ng[j-1]
-            q += (groups[j][i])*s
-        end
-        #q = sub2ind(ng,gi)
-        PP.nxy[x[i]+ 1,q] += 1
-        PP.ny[q] += 1
+		q = groups[1][i]+1
+		s = 1
+		for j in 2:ngroups
+				s *= ng[j-1]
+				q += (groups[j][i])*s
+		end
+		#q = sub2ind(ng,gi)
+		PP.nxy[x[i]+ 1,q] += 1
+		PP.ny[q] += 1
 	end
 end
 
-function get_conditional_counts(x::Array{Int64,1}, groups::AbstractArray{Int64,2})
+function get_conditional_counts(x::AbstractArray{Int64,1}, groups::AbstractArray{Int64,2})
 	mx = maximum(x)+1
 	mxy = maximum(groups,2)[:]+1
 	PP = ConditionalCounts(mx, mxy...)
