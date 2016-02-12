@@ -30,6 +30,7 @@ function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::AbstractArray{Int64,1
 	ee = entropy(p, α)
 	return RenyiEntropy(ee, α, ntrials, 0.0)
 end
+
 function estimate{T<:EntropyEstimator}(Q::Type{T}, X::AbstractArray{Int64,2}, α::Real=1.0,K::Integer=1000)
     counts = collect(values(StatsBase.countmap(vhash(X))))
     estimate(Q, counts, α,max(maximum(counts), K))
@@ -76,9 +77,9 @@ function entropy(p::Array{Float64,1},α::Real)
 end
 
 Docile.@doc meta("Compute the conditional entropy of x, conditioning on each row in Y")->
-function conditional_entropy{T<:EntropyEstimator}(Q::Type{T}, x::AbstractArray{Int64,1}, Y::AbstractArray{Int64,2};α::Float64=1.0)
+function conditional_entropy{T<:EntropyEstimator}(Q::Type{T}, x::AbstractArray{Int64,1}, Y::AbstractArray{Int64,2},s::AbstractArray{Int64,1}=Int64[];α::Float64=1.0)
 	groups,_ = size(Y)
-	CC = Entropies.get_conditional_counts(x,Y)
+	CC = Entropies.get_conditional_counts(x,Y,s)
 	conditional_entropy(Q, CC,α)
 end
 

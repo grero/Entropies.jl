@@ -127,6 +127,9 @@ function test_information()
 	#X1 contains 2 bits of entropy; we should get this even if we condition on a dummy variable
 	EE,ss = Entropies.conditional_entropy(Entropies.MaEstimator, X1, ones(Int64,1000))
 	@test_approx_eq EE 1.9958536092301569
+	#test with two dummy indices
+	EE,ss = Entropies.conditional_entropy(Entropies.MaEstimator, X1, ones(Int64,1,1000), zeros(Int64,1000))
+	@test_approx_eq EE 1.9958536092301569
 	I,M,S = Entropies.information(Entropies.MaEstimator, s'', Z, X'', 100)
 	@test_approx_eq I[1,1] 1.0003606737602229
 	println("Test information passed")
