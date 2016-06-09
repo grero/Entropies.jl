@@ -21,9 +21,9 @@ function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Arra
         I = Hs .- H
         M = mean(I[:,2:end],2)[:]
         S = std(I[:,2:end],2)[:]
-        I[:,1], M, S
+        return I[:,1], M, S
     else
-        Hs .- H[:,1], σ²[:,1].+σ²s
+        return Hs .- H[:,1], σ²[:,1].+σ²s
     end
 end
 
