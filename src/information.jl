@@ -9,7 +9,7 @@ function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Arra
     σ²s = zeros(nbins)
     Ys = copy(X)
     for i in 1:nbins
-        SE = estimate(Q,X[:,i]')
+        SE = estimate(Q,X[:,i]',α)
         Hs[i] = SE.H
         σ²s[i] = SE.σ²
         for r in 1:nruns
