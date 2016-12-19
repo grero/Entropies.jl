@@ -22,11 +22,11 @@ function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::AbstractArray{Int64,1
 	if α == 1
 		return estimate(Q, counts,K)
 	end
-        n = length(counts)
-        p = zeros(Float64,n)
-        for i in 1:n
-            @inbounds p[i] = counts[i]/ntrials
-        end
+	n = length(counts)
+	p = zeros(Float64,n)
+	for i in 1:n
+    @inbounds p[i] = counts[i]/ntrials
+	end
 	ee = entropy(p, α)
 	return RenyiEntropy(ee, α, ntrials, 0.0)
 end
