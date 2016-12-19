@@ -2,10 +2,9 @@ import Distributions
 import Winston
 using Entropies
 
-using Docile
-@docstrings
-
-Docile.@doc meta("Test conditional entropy")->
+"""
+Test conditional entropy")
+"""
 function generate_data(;ntrials=1000,β = 0.003)
 	λ₁ = 5.0
 	β₀ = 0.01
@@ -68,7 +67,9 @@ function explore_β()
 	ta
 end
 
-Docile.@doc meta("Generate q's from Eq. (5) in Nemenman et al. (2008)")->
+"""
+Generate q's from Eq. (5) in Nemenman et al. (2008)")
+"""
 function generate_q(β, K)
        q = zeros(K)
        q[1] = rand(Distributions.Beta(β, (K-1)*β))

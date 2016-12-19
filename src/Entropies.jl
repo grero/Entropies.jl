@@ -1,9 +1,6 @@
 module Entropies
 import StatsBase
-import ArrayViews
-using Docile
 import StatsBase.entropy
-@docstrings
 
 include("utils.jl")
 include("types.jl")
@@ -53,7 +50,9 @@ function estimate(::Type{MaEstimator}, counts::Array{Int64,1},K::Integer=1000)
 	SE  = ShannonEntropy(pp, ntrials)
 end
 
-Docile.@doc meta("Compute tne Renyi entropy of order `α` of the discrete variable `x`. `α` = 1 corresponds to Shannon entropy")->
+"""
+Compute tne Renyi entropy of order `α` of the discrete variable `x`. `α` = 1 corresponds to Shannon entropy")
+"""
 function entropy(x::Array{Int64,1},α::Real)
   n = StatsBase.counts(x,minimum(x):maximum(x))
   p = n./sum(n)
@@ -76,7 +75,9 @@ function entropy(p::Array{Float64,1},α::Real)
   E = (1/(1-α))*log2(E)
 end
 
-Docile.@doc meta("Compute the conditional entropy of x, conditioning on each row in Y")->
+"""
+Compute the conditional entropy of x, conditioning on each row in Y")
+"""
 function conditional_entropy{T<:EntropyEstimator}(Q::Type{T}, x::AbstractArray{Int64,1}, Y::AbstractArray{Int64,2},s::AbstractArray{Int64,1}=Int64[];α::Float64=1.0)
 	groups,_ = size(Y)
 	CC = Entropies.get_conditional_counts(x,Y,s)
