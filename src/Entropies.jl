@@ -1,5 +1,5 @@
 module Entropies
-import StatsBase
+using StatsBase
 import StatsBase.entropy
 
 include("utils.jl")
@@ -24,7 +24,7 @@ function estimate{T<:EntropyEstimator}(Q::Type{T}, counts::AbstractArray{Int64,1
 	for i in 1:n
     @inbounds p[i] = counts[i]/ntrials
 	end
-	ee = entropy(p, α)
+	ee = renyientropy(p, α)
 	return RenyiEntropy(ee, α, ntrials, 0.0)
 end
 
@@ -64,17 +64,6 @@ function entropy(x::Array{Int64,1},α::Real)
   end
 end
 
-function entropy(p::Array{Float64,1},α::Real)
-  if α == 1
-	  return entropy(p)/log(2)
-  end
-  E = 0.0
-  for i in 1:length(p)
-    @inbounds E += p[i]^α
-  end
-  E = (1/(1-α))*log2(E)
-end
-
 """
 Compute the conditional entropy of x, conditioning on each row in Y")
 """
@@ -105,25 +94,25 @@ function conditional_entropy{T<:EntropyEstimator}(::Type{T}, CC::ConditionalCoun
 		end
 		return q/ntrials,σ²/ntrials
 	end
-	ρ = zeros(Float64,size(CC.ny)...)
+	ρ = zeros(Float64,size(CC.ny))
 	n = sum(CC.ny)
 	if n == 0
 		return 0.0, 0.0
 	end
-	for i in 1:length(ρ)
+	@inbounds for i in 1:length(CC.ny)
 		_pi =(CC.ny[i]/n)^α
 		q += _pi
 		ρ[i] = _pi
 	end
-	ρ = ρ./q
-	q = 0.0
-	for i in 1:length(ρ)
+	q2 = 0.0
+	@inbounds for i in 1:length(CC.ny)
+    ρ[i] = ρ[i]/q
 		_e = estimate(T,CC.nxy[:,i],α)
-		if ρ[i] > 0
-			q += ρ[i]*g(_e.H,α)
+    if ρ[i] > 0
+      q2 += ρ[i]*g(_e.H,α)
 		end
 	end
-	hh = h(q,α), 0.0
+	hh = h(q2,α), 0.0
 end
 
 function conditional_entropy(CC::ConditionalCounts,α::Float64=1.0)
