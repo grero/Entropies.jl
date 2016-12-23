@@ -14,7 +14,7 @@ function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Arra
         σ²s[i] = SE.σ²
         for r in 1:nruns
             H[i,r],σ²[i,r] = conditional_entropy(Q,X[:,i], Ys[:,i];α=α)
-            shuffle!(ArrayViews.view(Ys, :, i))
+            shuffle!(view(Ys, :, i))
         end
     end
     if nruns > 1
@@ -47,7 +47,7 @@ function information{T<:EntropyEstimator}(Q::Type{T}, X::Array{Int64,2}, Y::Arra
   end
   for r in 2:nruns+1
     for i in 1:nbins
-      shuffle!(ArrayViews.view(Zs,:,i))
+      shuffle!(view(Zs,:,i))
       Hx_yz[r,i], σx_sy[r,i] = conditional_entropy(Q, X[:,i], Y[:,i], Zs[:,i];α=α)
     end
   end
